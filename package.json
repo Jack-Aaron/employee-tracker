@@ -1,0 +1,29 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "employee CMS",
+  "main": "index.js",
+  "dependencies": {
+    "asciiart-logo": "^0.2.6",
+    "console.table": "^0.10.0",
+    "inquirer": "^7.1.0",
+    "mysql": "^2.18.1",
+    "process": "^0.11.10",
+    "util": "^0.12.3",
+    "validate": "^5.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jack-Aaron/Employee-Tracker.git"
+  },
+  "author": "Jonathan Alpart",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jack-Aaron/Employee-Tracker/issues"
+  },
+  "homepage": "https://github.com/Jack-Aaron/Employee-Tracker#readme"
+}
