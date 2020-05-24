@@ -126,6 +126,45 @@ async function addToDepartments() {
   mainPrompts();
 }
 
+async function addToRoles() {
+  let { title, salary, department_id } = await prompt(
+    [
+      {
+        name: 'title',
+        type: 'input',
+        message: '\nWhat is the Title of the new Role?'
+      },
+      {
+        name: 'salary',
+        type: 'number',
+        message: '\nWhat is the Salary of the new Role?',
+        validate: function (value) {
+          if (isNaN(value) === false) {
+            return true;
+          }
+          return false;
+        }
+      },
+      {
+        name: 'department_id',
+        type: 'number',
+        message: '\nWhat is the Department ID of the new Role?',
+        validate: function (value) {
+          if (isNaN(value) === false) {
+            return true;
+          }
+          return false;
+        }
+      }
+    ]
+  );
+
+  await db.addNewRole(title, salary, department_id);
+
+  console.log('\nYour Role was created successfully!');
+  mainPrompts();
+}
+
 function quit() {
   console.log('\nThank you for your service to Evil Corp.');
   process.exit();
