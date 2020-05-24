@@ -1,15 +1,17 @@
+// connects to MySQL database
 const connection = require('./connection');
-
+//main constructor that processes all queries
 class DB {
   constructor(connection) {
     this.connection = connection;
   }
+  // gets everything from the 'department' table
   getAllDepartments() {
     return this.connection.query('SELECT * FROM department');
   }
-
+  //displays all Employees in a chosen Department
   viewDepartment(department) {
-    return this.connection.query(`SELECT concat(name, ' (', department_id, ')') AS 'Department (+ ID)', concat(employee.first_name, ' ', employee.last_name) AS 'Employee', employee.id AS 'ID', role.title AS 'Title', concat('$', FORMAT(role.salary,0)) AS 'Salary', concat(manager.first_name, ' ', manager.last_name) AS Manager
+    return this.connection.query(`SELECT concat(name, ' (', department_id, ')') AS 'Department (+ ID)', concat(employee.first_name, ' ', employee.last_name) AS 'Employee', employee.id AS 'ID', role.title AS 'Title', concat('$', FORMAT(role.salary,2)) AS 'Salary', concat(manager.first_name, ' ', manager.last_name) AS Manager
     FROM employee
     INNER JOIN role ON role.id = employee.role_id
     INNER JOIN department ON department.id = role.department_id
@@ -27,6 +29,12 @@ class DB {
     return this.connection.query('SELECT * FROM role');
   }
 
+  viewRole(role) {
+    return this.connection.query(`SELECT role.title AS 'Title', employee.id AS 'Employee ID', concat(employee.first_name, ' ', employee.last_name) AS 'Name'
+    FROM employee
+    INNER JOIN role on role.id = employee.role_id
+    WHERE role.title = "${role}";`)
+  }
   addNewRole(title, salary, department_id) {
     return this.connection.query('INSERT INTO role SET ?', {
       title: title,
@@ -36,7 +44,7 @@ class DB {
   }
 
   getAllEmployees() {
-    return this.connection.query(`SELECT employee.id AS 'ID', employee.first_name AS 'First Name', employee.last_name AS 'Last Name', role.title AS 'Title', department.name AS 'Department', role.salary 'Salary', concat(manager.first_name, ' ', manager.last_name) AS Manager
+    return this.connection.query(`SELECT employee.id AS 'ID', concat(employee.first_name, ' ', employee.last_name) AS 'Name', role.title AS 'Title', department.name AS 'Department', concat('$', FORMAT(role.salary,2)) AS 'Salary', concat(manager.first_name, ' ', manager.last_name) AS Manager
     FROM employee
     INNER JOIN role ON role.id = employee.role_id
     INNER JOIN department ON department.id = role.department_id

@@ -13,7 +13,7 @@ function init() {
 
   mainPrompts();
 }
-
+//main menu of app
 async function mainPrompts() {
   const { choice } = await prompt({
     name: 'choice',
@@ -25,7 +25,7 @@ async function mainPrompts() {
 
   switch (choice) {
     case 'VIEW':
-      return viewTables();
+      return viewQueries();
     case 'ADD':
       return addToTables();
     case 'UPDATE':
@@ -34,18 +34,18 @@ async function mainPrompts() {
       quit();
   }
 }
-
-async function viewTables() {
-  let { table } = await prompt([
+// user selects to View queries of current database
+async function viewQueries() {
+  let { viewBy } = await prompt([
     {
-      name: 'table',
+      name: 'viewBy',
       type: 'rawlist',
       choices: ['DEPARTMENT', 'ROLE', 'ALL EMPLOYEES', 'BACK'],
       message: '\nWould you like to View Employees by [DEPARMENT], [ROLE] or View [ALL EMPLOYEES], or go [BACK] a step?'
     }
   ]);
-
-  switch (table) {
+// different ways user can View Employees
+  switch (viewBy) {
     case 'DEPARTMENT':
       return viewDepartments();
     case 'ROLE':
@@ -56,7 +56,7 @@ async function viewTables() {
       mainPrompts();
   }
 }
-
+// user selects to View Employees by Departments
 async function viewDepartments() {
   const departments = await db.getAllDepartments();
 
@@ -69,32 +69,27 @@ async function viewDepartments() {
     }
   ]);
 
-  let yud = await db.viewDepartment(department.toString());
+  const employeesbyDept = await db.viewDepartment(department.toString());
   console.log('\n');
-  console.table(yud);
+  console.table(employeesbyDept);
   mainPrompts();
-
-  // .then(async function (department) {
-  //   await db.viewDepartment(department.toString());
-  // })
 }
-// async function viewDepartments() {
-//   const department = await db.getAllDepartments();
-
-//   console.log('\n');
-
-//   console.table(department);
-
-//   mainPrompts();
-// }
 
 async function viewRoles() {
-  const role = await db.getAllRoles();
+  const roles = await db.getAllRoles();
 
+  let { role } = await prompt([
+    {
+      name: 'role',
+      type: 'rawlist',
+      choices: roles.map(role => role.title),
+      message: '\nWithin which Role would you like to View Employees?'
+    }
+  ]);
+
+  const employeesbyRole = await db.viewRole(role.toString());
   console.log('\n');
-
-  console.table(role);
-
+  console.table(employeesbyRole);
   mainPrompts();
 }
 
