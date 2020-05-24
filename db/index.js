@@ -8,7 +8,7 @@ class DB {
     return this.connection.query('SELECT * FROM department');
   }
 
-  addNewDepartment(item) {
+  addNewDepartment(name) {
     return this.connection.query('INSERT INTO department SET ?', {
       name: name
     });

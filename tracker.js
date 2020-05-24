@@ -109,40 +109,26 @@ async function addToTables() {
   }
 }
 
+async function addToDepartments() {
+  let { name } = await prompt(
+    [
+      {
+        name: 'name',
+        type: 'input',
+        message: '\nWhat is the Name of the new Department?',
+      }
+    ],
+  );
+
+  await db.addNewDepartment(name);
+
+  console.log('\nYour Department was created successfully!');
+  mainPrompts();
+}
+
 function quit() {
   console.log('\nThank you for your service to Evil Corp.');
   process.exit();
 }
 
-// async function addToTables() {
-//   let { table } = await prompt(
-//     [
-//       {
-//         name: "item",
-//         type: "input",
-//         message: "\nWhat is the item you would like to submit?",
-//       },
-//       {
-//         name: "category",
-//         type: "input",
-//         message: "\nWhat category would you like to place your auction in?",
-//       },
-//       {
-//         name: "startingBid",
-//         type: "input",
-//         message: "\nWhat would you like your starting bid to be?",
-//         validate: function (value) {
-//           if (isNaN(value) === false) {
-//             return true;
-//           }
-//           return false;
-//         },
-//       },
-//     ],
-//   );
 
-//   await db.insertAuction(item, category, startingBid);
-
-//   console.log("Your auction was created successfully!\n");
-//   loadMainPrompts();
-// }
