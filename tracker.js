@@ -40,17 +40,17 @@ async function viewTables() {
     {
       name: 'table',
       type: 'rawlist',
-      choices: ['DEPARTMENTS', 'ROLES', 'EMPLOYEES', 'BACK'],
-      message: '\nWould you like to View the [DEPARMENTS], [ROLES] or [EMPLOYEES] Table, or go [BACK] a step?'
+      choices: ['DEPARTMENT', 'ROLE', 'ALL EMPLOYEES', 'BACK'],
+      message: '\nWould you like to View Employees by [DEPARMENT], [ROLE] or View [ALL EMPLOYEES], or go [BACK] a step?'
     }
   ]);
 
   switch (table) {
-    case 'DEPARTMENTS':
+    case 'DEPARTMENT':
       return viewDepartments();
-    case 'ROLES':
+    case 'ROLE':
       return viewRoles();
-    case 'EMPLOYEES':
+    case 'ALL EMPLOYEES':
       return viewEmployees();
     case 'BACK':
       mainPrompts();
@@ -58,14 +58,35 @@ async function viewTables() {
 }
 
 async function viewDepartments() {
-  const department = await db.getAllDepartments();
+  const departments = await db.getAllDepartments();
 
+  let { department } = await prompt([
+    {
+      name: 'department',
+      type: 'rawlist',
+      choices: departments.map(department => department.name),
+      message: '\nWithin which Department would you like to View Employees?'
+    }
+  ]);
+
+  let yud = await db.viewDepartment(department.toString());
   console.log('\n');
-
-  console.table(department);
-
+  console.table(yud);
   mainPrompts();
+
+  // .then(async function (department) {
+  //   await db.viewDepartment(department.toString());
+  // })
 }
+// async function viewDepartments() {
+//   const department = await db.getAllDepartments();
+
+//   console.log('\n');
+
+//   console.table(department);
+
+//   mainPrompts();
+// }
 
 async function viewRoles() {
   const role = await db.getAllRoles();

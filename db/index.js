@@ -8,6 +8,15 @@ class DB {
     return this.connection.query('SELECT * FROM department');
   }
 
+  viewDepartment(department) {
+    return this.connection.query(`SELECT concat(name, ' (', department_id, ')') AS 'Department (+ ID)', concat(employee.first_name, ' ', employee.last_name) AS 'Employee', employee.id AS 'ID', role.title AS 'Title', concat('$', FORMAT(role.salary,0)) AS 'Salary', concat(manager.first_name, ' ', manager.last_name) AS Manager
+    FROM employee
+    INNER JOIN role ON role.id = employee.role_id
+    INNER JOIN department ON department.id = role.department_id
+    LEFT JOIN employee AS manager ON employee.manager_id = manager.id
+    WHERE department.name = "${department}";`)
+  }
+
   addNewDepartment(name) {
     return this.connection.query('INSERT INTO department SET ?', {
       name: name
