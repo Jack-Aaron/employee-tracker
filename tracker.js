@@ -165,6 +165,52 @@ async function addToRoles() {
   mainPrompts();
 }
 
+async function addToEmployees() {
+  let { first_name, last_name, role_id, manager_id } = await prompt(
+    [
+      {
+        name: 'first_name',
+        type: 'input',
+        message: '\nWhat is the First Name of the new Employee?'
+      },
+      {
+        name: 'last_name',
+        type: 'input',
+        message: '\nWhat is the Last Name of the new Employee?'
+      },
+      {
+        name: 'role_id',
+        type: 'number',
+        message: '\nWhat is the Role ID of the new Employee?',
+        validate: function (value) {
+          if (isNaN(value) === false) {
+            return true;
+          }
+          return false;
+        }
+      },
+      {
+        name: 'manager_id',
+        type: 'number',
+        message: '\nWhat is the Manager ID of the new Employee?\n (If none, leave blank and press Enter)',
+        validate: function (value) {
+          if (isNaN(value) === false && value !== null) {
+            return true;
+          }
+          return false;
+        }
+      },
+    ],
+  );
+
+  await db.addNewEmployee(first_name, last_name, role_id, manager_id);
+
+  console.log('Your Employee was created successfully!\n');
+  mainPrompts();
+}
+
+
+
 function quit() {
   console.log('\nThank you for your service to Evil Corp.');
   process.exit();
