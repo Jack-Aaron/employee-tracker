@@ -11,12 +11,12 @@ class DB {
   }
   //displays all Employees in a chosen Department
   viewDepartment(department) {
-    return this.connection.query(`SELECT concat(name, ' (', department_id, ')') AS 'Department (+ ID)', concat(employee.first_name, ' ', employee.last_name) AS 'Employee', employee.id AS 'ID', role.title AS 'Title', concat('$', FORMAT(role.salary,2)) AS 'Salary', concat(manager.first_name, ' ', manager.last_name) AS Manager
+    return this.connection.query(`SELECT concat(employee.first_name, ' ', employee.last_name) AS 'Employee', employee.id AS 'ID', role.title AS 'Title', concat('$', FORMAT(role.salary,2)) AS 'Salary', concat(manager.first_name, ' ', manager.last_name) AS Manager
     FROM employee
     INNER JOIN role ON role.id = employee.role_id
     INNER JOIN department ON department.id = role.department_id
     LEFT JOIN employee AS manager ON employee.manager_id = manager.id
-    WHERE department.name = "${department}";`)
+    WHERE department.name = '${department}';`)
   }
 
   addNewDepartment(name) {
@@ -30,11 +30,26 @@ class DB {
   }
 
   viewRole(role) {
-    return this.connection.query(`SELECT role.title AS 'Title', employee.id AS 'Employee ID', concat(employee.first_name, ' ', employee.last_name) AS 'Name'
+    return this.connection.query(`SELECT role.title AS 'Role',
+    department.name AS 'Department',
+    employee.id AS 'Employee ID',
+    concat(employee.first_name, ' ', employee.last_name) AS 'Name',
+    concat('$',FORMAT(role.salary,2)) AS 'Salary',
+    concat(manager.first_name, ' ', manager.last_name) AS Manager
     FROM employee
-    INNER JOIN role on role.id = employee.role_id
-    WHERE role.title = "${role}";`)
+    INNER JOIN role ON role.id = employee.role_id
+    INNER JOIN department ON department.id = role.department_id
+    LEFT JOIN employee AS manager ON employee.manager_id = manager.id
+    WHERE role.title = '${role}';`)
   }
+
+  getDepartmentIDByDepartment(department) {
+    return this.connection.query(`SELECT department.id
+    FROM department
+    INNER JOIN role ON role.department_id = department.id
+    WHERE name = '${department}';`)
+  }
+  
   addNewRole(title, salary, department_id) {
     return this.connection.query('INSERT INTO role SET ?', {
       title: title,
