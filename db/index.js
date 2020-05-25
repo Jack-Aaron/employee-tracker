@@ -53,9 +53,8 @@ class DB {
   }
 
   getDepartmentIDByDepartment(department) {
-    return this.connection.query(`SELECT DISTINCT department.id
+    return this.connection.query(`SELECT id
     FROM department
-    INNER JOIN role ON role.department_id = department.id
     WHERE name = '${department}';`)
   }
 

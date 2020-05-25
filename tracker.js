@@ -8,9 +8,7 @@ init();
 // Display logo text, load main prompts
 function init() {
   const logoText = logo({ name: 'Employee Tracker' }).render();
-
   console.log(logoText);
-
   mainPrompts();
 }
 //main menu of app
@@ -59,7 +57,6 @@ async function viewQueries() {
 // user selects to View Employees by Departments
 async function viewDepartments() {
   const departments = await db.getAllDepartments();
-
   let { department } = await prompt([
     {
       name: 'department',
@@ -83,7 +80,6 @@ async function viewDepartments() {
 
 async function viewRoles() {
   const roles = await db.getAllRoles();
-
   let { role } = await prompt([
     {
       name: 'role',
@@ -92,7 +88,6 @@ async function viewRoles() {
       message: '\nWithin which Role would you like to View Employees?'
     }
   ]);
-
   const employeesbyRole = await db.viewRole(role.toString());
   if (employeesbyRole == '') {
     console.log('\n');
@@ -110,11 +105,8 @@ async function viewRoles() {
 
 async function viewEmployees() {
   const employee = await db.getAllEmployees();
-
   console.log('\n');
-
   console.table(employee);
-
   mainPrompts();
 }
 
@@ -149,16 +141,13 @@ async function addToDepartments() {
         message: '\nWhat is the Name of the new Department?',
       }
     ]);
-
   await db.addNewDepartment(name);
-
   console.log('\nYour Department was created successfully!');
   mainPrompts();
 }
 
 async function addToRoles() {
   const departments = await db.getAllDepartments();
-
   let { title, salary, department } = await prompt(
     [
       {
@@ -169,7 +158,7 @@ async function addToRoles() {
       {
         name: 'salary',
         type: 'number',
-        message: 'What is the Salary of the new Role? (Enter an Interger only.)',
+        message: 'What is the Salary of the new Role? (Enter an Integer only.)',
         validate: function (value) {
           if (isNaN(value) === false) {
             return true;
@@ -184,7 +173,6 @@ async function addToRoles() {
         message: 'What is the Department of the new Role?'
       }
     ])
-
   const departmentRes = await db.getDepartmentIDByDepartment(department.toString());
   const department_id = departmentRes[0].id;
   await db.addNewRole(title, salary, department_id);
@@ -197,6 +185,8 @@ async function addToRoles() {
 async function addToEmployees() {
   const roles = await db.getAllRoles();
   const employees = await db.whoIsManager();
+  const managerChoices = employees.map(employee => employee.first_name + ' ' + employee.last_name);
+  managerChoices.push('[NONE]');
   let { first_name, last_name, role, manager } = await prompt(
     [
       {
@@ -218,19 +208,19 @@ async function addToEmployees() {
       {
         name: 'manager',
         type: 'rawlist',
-        choices: employees.map(employee => employee.first_name + ' ' + employee.last_name),
-        message: 'Who will be the Manager of the new Employee?\n (If none, leave blank and press Enter)'
+        choices: managerChoices,
+        message: 'Who will be the Manager of the new Employee?\n (If they are not managed, select [NONE])'
       }
     ],
   );
-
   const roleResponse = await db.getRoleIDByTitle(role);
   const role_id = roleResponse[0].id;
-  const managerResponse = await db.getManagerIDByEmployee(manager);
-  const manager_id = managerResponse[0].id;
-
+  let manager_id = null;
+  if (manager !== '[NONE]') {
+    const managerResponse = await db.getManagerIDByEmployee(manager);
+    manager_id = managerResponse[0].id;
+  };
   await db.addNewEmployee(first_name, last_name, role_id, manager_id);
-
   console.log(`\nYour Employee ${first_name} ${last_name} was created successfully!\n`);
   mainPrompts();
 }
