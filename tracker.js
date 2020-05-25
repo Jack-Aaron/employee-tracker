@@ -99,7 +99,6 @@ async function viewRoles() {
     const roleTable = await db.getThisRole(role.toString());
     console.table(roleTable);
     console.log('\n No Employee is filling this Role.');
-    
     mainPrompts();
   }
   else {
@@ -125,7 +124,7 @@ async function addToTables() {
       name: 'table',
       type: 'rawlist',
       choices: ['DEPARTMENTS', 'ROLES', 'EMPLOYEES', 'BACK'],
-      message: '\nWould you like to Add to the [DEPARMENTS], [ROLES] or [EMPLOYEES] Table, or go [BACK] a step?'
+      message: 'Would you like to Add to the [DEPARMENTS], [ROLES] or [EMPLOYEES] Table, or go [BACK] a step?'
     }
   ]);
 
@@ -170,7 +169,7 @@ async function addToRoles() {
       {
         name: 'salary',
         type: 'number',
-        message: '\nWhat is the Salary of the new Role? (Enter an Interger only.)',
+        message: 'What is the Salary of the new Role? (Enter an Interger only.)',
         validate: function (value) {
           if (isNaN(value) === false) {
             return true;
@@ -182,7 +181,7 @@ async function addToRoles() {
         name: 'department',
         type: 'rawlist',
         choices: departments.map(department => department.name),
-        message: '\nWhat is the Department of the new Role?'
+        message: 'What is the Department of the new Role?'
       }
     ])
 
@@ -196,7 +195,9 @@ async function addToRoles() {
 }
 
 async function addToEmployees() {
-  let { first_name, last_name, role_id, manager_id } = await prompt(
+  const roles = await db.getAllRoles();
+  const employees = await db.whoIsManager();
+  let { first_name, last_name, role, manager } = await prompt(
     [
       {
         name: 'first_name',
@@ -206,24 +207,31 @@ async function addToEmployees() {
       {
         name: 'last_name',
         type: 'input',
-        message: '\nWhat is the Last Name of the new Employee?'
+        message: 'What is the Last Name of the new Employee?'
       },
       {
-        name: 'role_id',
-        type: 'number',
-        message: '\nWhat is the Role ID of the new Employee?',
+        name: 'role',
+        type: 'rawlist',
+        choices: roles.map(role => role.title),
+        message: 'What is the Role of the new Employee?',
       },
       {
-        name: 'manager_id',
-        type: 'number',
-        message: '\nWhat is the Manager ID of the new Employee?\n (If none, leave blank and press Enter)'
-      },
+        name: 'manager',
+        type: 'rawlist',
+        choices: employees.map(employee => employee.first_name + ' ' + employee.last_name),
+        message: 'Who will be the Manager of the new Employee?\n (If none, leave blank and press Enter)'
+      }
     ],
   );
 
+  const roleResponse = await db.getRoleIDByTitle(role);
+  const role_id = roleResponse[0].id;
+  const managerResponse = await db.getManagerIDByEmployee(manager);
+  const manager_id = managerResponse[0].id;
+
   await db.addNewEmployee(first_name, last_name, role_id, manager_id);
 
-  console.log('Your Employee was created successfully!\n');
+  console.log(`\nYour Employee ${first_name} ${last_name} was created successfully!\n`);
   mainPrompts();
 }
 
@@ -231,5 +239,3 @@ function quit() {
   console.log('\nThank you for your service to Evil Corp.');
   process.exit();
 }
-
-
