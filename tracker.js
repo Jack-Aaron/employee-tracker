@@ -249,9 +249,9 @@ async function updateEmployees() {
         message: `\nWhich Role would you like to assign?`
       }
     ]);
-  const employeeRes = await db.getEmployeeIDFromEmployeeName(employee);
+  const employeeRes = await db.getEmployeeIDByEmployeeName(employee);
   let employee_id = employeeRes[0].id;
-  const roleRes = await db.getRoleIDFromRoleTile(newRole);
+  const roleRes = await db.getRoleIDByTitle(newRole);
   let role_id = roleRes[0].id;
   // update Role of Employee
   await db.updateEmployee(employee_id, role_id);
