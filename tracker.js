@@ -142,7 +142,7 @@ async function addToDepartments() {
       }
     ]);
   await db.addNewDepartment(name);
-  console.log('\nYour Department was created successfully!');
+  console.log('\nYour Department was created successfully.');
   mainPrompts();
 }
 
@@ -184,7 +184,7 @@ async function addToRoles() {
 
 async function addToEmployees() {
   const roles = await db.getAllRoles();
-  const employees = await db.whoIsManager();
+  const employees = await db.whoIsEmployee();
   const managerChoices = employees.map(employee => employee.first_name + ' ' + employee.last_name);
   managerChoices.push('[NONE]');
   let { first_name, last_name, role, manager } = await prompt(
@@ -221,7 +221,39 @@ async function addToEmployees() {
     manager_id = managerResponse[0].id;
   };
   await db.addNewEmployee(first_name, last_name, role_id, manager_id);
-  console.log(`\nYour Employee ${first_name} ${last_name} was created successfully!\n`);
+  console.log(`\nYour Employee ${first_name} ${last_name} was created successfully.\n`);
+  mainPrompts();
+}
+
+async function updateEmployees() {
+  const employeeTable = await db.getAllEmployees();
+  const employees = await db.whoIsEmployee();
+  const roles = await db.getAllRoles();
+  console.log('\n');
+  console.table(employeeTable);
+  let { employee, newRole } = await prompt(
+    [
+      {
+        name: 'employee',
+        type: 'rawlist',
+        choices: employees.map(employee => employee.first_name + ' ' + employee.last_name),
+        message: 'Which Employee would you like to Update?'
+      },
+      {
+        name: 'newRole',
+        type: 'rawlist',
+        choices: roles.map(role => role.title),
+        message: `\nWhich Role would you like to assign?`
+      }
+    ],
+  );
+  const employeeRes = await db.getEmployeeIDFromEmployeeName(employee);
+  let employee_id = employeeRes[0].id;
+  const roleRes = await db.getRoleIDFromRoleTile(newRole);
+  let role_id = roleRes[0].id;
+  const updatedEmployee = await db.updateEmployee(employee_id, role_id);
+  console.log(`\nYour Employee ${employee} has been promoted to ${newRole}:\n`);
+  console.table(await db.getThisRole(newRole));
   mainPrompts();
 }
 

@@ -16,13 +16,7 @@ class DB {
     INNER JOIN role ON role.id = employee.role_id
     INNER JOIN department ON department.id = role.department_id
     LEFT JOIN employee AS manager ON employee.manager_id = manager.id
-    WHERE department.name = '${department}';`)
-  }
-
-  addNewDepartment(name) {
-    return this.connection.query('INSERT INTO department SET ?', {
-      name: name
-    });
+    WHERE department.name = '${department}'`)
   }
 
   getAllRoles() {
@@ -40,7 +34,7 @@ class DB {
     INNER JOIN role ON role.id = employee.role_id
     INNER JOIN department ON department.id = role.department_id
     LEFT JOIN employee AS manager ON employee.manager_id = manager.id
-    WHERE role.title = '${role}';`)
+    WHERE role.title = '${role}'`)
   }
 
   getThisRole(title) {
@@ -52,10 +46,24 @@ class DB {
     WHERE title = '${title}'`)
   }
 
+  getAllEmployees() {
+    return this.connection.query(`SELECT employee.id AS 'ID', concat(employee.first_name, ' ', employee.last_name) AS 'Name', role.title AS 'Title', department.name AS 'Department', concat('$', FORMAT(role.salary,2)) AS 'Salary', concat(manager.first_name, ' ', manager.last_name) AS Manager
+    FROM employee
+    INNER JOIN role ON role.id = employee.role_id
+    INNER JOIN department ON department.id = role.department_id
+    LEFT JOIN employee AS manager ON employee.manager_id = manager.id`);
+  }
+
+  addNewDepartment(name) {
+    return this.connection.query('INSERT INTO department SET ?', {
+      name: name
+    });
+  }
+
   getDepartmentIDByDepartment(department) {
     return this.connection.query(`SELECT id
     FROM department
-    WHERE name = '${department}';`)
+    WHERE name = '${department}'`)
   }
 
   addNewRole(title, salary, department_id) {
@@ -66,28 +74,20 @@ class DB {
     });
   }
 
-  getAllEmployees() {
-    return this.connection.query(`SELECT employee.id AS 'ID', concat(employee.first_name, ' ', employee.last_name) AS 'Name', role.title AS 'Title', department.name AS 'Department', concat('$', FORMAT(role.salary,2)) AS 'Salary', concat(manager.first_name, ' ', manager.last_name) AS Manager
-    FROM employee
-    INNER JOIN role ON role.id = employee.role_id
-    INNER JOIN department ON department.id = role.department_id
-    LEFT JOIN employee AS manager ON employee.manager_id = manager.id;`);
-  }
-
-  whoIsManager() {
+  whoIsEmployee() {
     return this.connection.query('SELECT * FROM employee');
   }
 
   getRoleIDByTitle(title) {
     return this.connection.query(`SELECT id
     FROM role
-    WHERE title = '${title}';`)
+    WHERE title = '${title}'`)
   }
 
   getManagerIDByEmployee(name) {
     return this.connection.query(`SELECT DISTINCT id
     FROM employee
-    WHERE concat(first_name, ' ', last_name) = '${name}';`);
+    WHERE concat(first_name, ' ', last_name) = '${name}'`);
   }
 
   addNewEmployee(first_name, last_name, role_id, manager_id) {
@@ -99,15 +99,27 @@ class DB {
     });
   }
 
-  updateRole(role, chosenEmployee) {
+  getEmployeeIDFromEmployeeName(employee) {
+    return this.connection.query(`SELECT id
+    FROM employee
+    WHERE concat(first_name, ' ', last_name) = '${employee}'`)
+  }
+
+  getRoleIDFromRoleTile(title) {
+    return this.connection.query(`SELECT id
+    FROM role
+    WHERE title = '${title}'`)
+  }
+
+  updateEmployee(employee_id, role_id) {
     return this.connection.query('UPDATE employee SET ? WHERE ?', [
       {
         role_id: role_id,
       },
       {
-        id: chosenEmployee.id,
+        id: employee_id,
       },
-    ]);
+    ])
   }
 }
 
