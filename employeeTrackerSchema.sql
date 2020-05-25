@@ -25,3 +25,12 @@ CREATE TABLE employee(
   manager_id INT default NULL,
   PRIMARY KEY (id)
 );
+
+CREATE TABLE viewEmployees(
+id INT NOT NULL,
+first_name VARCHAR(30) NOT NULL,
+last_name VARCHAR(30) NOT NULL,
+role INT default 0,
+manager VARCHAR(30) NOT NULL
+);
+

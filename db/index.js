@@ -43,8 +43,17 @@ class DB {
     WHERE role.title = '${role}';`)
   }
 
+  getThisRole(title) {
+    return this.connection.query(`SELECT title AS 'Role',
+    concat('$',FORMAT(salary,2)) AS 'Salary',
+    department.name AS 'Department'
+    FROM role
+    INNER JOIN department ON department.id = role.department_id
+    WHERE title = '${title}'`)
+  }
+
   getDepartmentIDByDepartment(department) {
-    return this.connection.query(`SELECT department.id
+    return this.connection.query(`SELECT DISTINCT department.id
     FROM department
     INNER JOIN role ON role.department_id = department.id
     WHERE name = '${department}';`)

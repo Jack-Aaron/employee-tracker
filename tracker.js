@@ -76,7 +76,6 @@ async function viewDepartments() {
   }
   else {
     console.log('\n');
-    console.log(employeesbyDept);
     console.table(employeesbyDept);
     mainPrompts();
   }
@@ -96,7 +95,11 @@ async function viewRoles() {
 
   const employeesbyRole = await db.viewRole(role.toString());
   if (employeesbyRole == '') {
+    console.log('\n');
+    const roleTable = await db.getThisRole(role.toString());
+    console.table(roleTable);
     console.log('\n No Employee is filling this Role.');
+    
     mainPrompts();
   }
   else {
@@ -183,9 +186,12 @@ async function addToRoles() {
       }
     ])
 
-  const department_id = await db.getDepartmentIDByDepartment(department.toString());
-  await db.addNewRole(title, salary, department_id.id);
-  console.log(`\nYour Role of was created successfully:\n`);
+  const departmentRes = await db.getDepartmentIDByDepartment(department.toString());
+  const department_id = departmentRes[0].id;
+  await db.addNewRole(title, salary, department_id);
+  const newRole = await db.getThisRole(title);
+  console.log(`\nYour Role of ${title} was created successfully:\n`);
+  console.table(newRole);
   mainPrompts();
 }
 
@@ -206,12 +212,6 @@ async function addToEmployees() {
         name: 'role_id',
         type: 'number',
         message: '\nWhat is the Role ID of the new Employee?',
-        validate: function (value) {
-          if (isNaN(value) === false) {
-            return true;
-          }
-          return false;
-        }
       },
       {
         name: 'manager_id',
@@ -226,8 +226,6 @@ async function addToEmployees() {
   console.log('Your Employee was created successfully!\n');
   mainPrompts();
 }
-
-
 
 function quit() {
   console.log('\nThank you for your service to Evil Corp.');
