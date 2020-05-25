@@ -6,8 +6,11 @@
   "dependencies": {
     "asciiart-logo": "^0.2.6",
     "console.table": "^0.10.0",
+    "express": "^4.17.1",
+    "heroku": "^7.41.1",
     "inquirer": "^7.1.0",
     "mysql": "^2.18.1",
+    "path": "^0.12.7",
     "process": "^0.11.10",
     "util": "^0.12.3",
     "validate": "^5.1.0"

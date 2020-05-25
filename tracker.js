@@ -51,7 +51,7 @@ async function viewQueries() {
     case 'ALL EMPLOYEES':
       return viewEmployees();
     case 'BACK':
-      mainPrompts();
+      mainPrompts(); // return to main menu
   }
 }
 // user selects to View Employees by Departments
@@ -61,14 +61,15 @@ async function viewDepartments() {
     {
       name: 'department',
       type: 'rawlist',
+      // .map method puts all relevant choices into an array
       choices: departments.map(department => department.name),
       message: '\nWithin which Department would you like to View Employees?'
     }
   ]);
-
-  const employeesbyDept = await db.viewDepartment(department.toString());
+  // checks if Department has any employees for user convenience
+  const employeesbyDept = await db.viewDepartment(department);
   if (employeesbyDept == '') {
-    console.log('\n This Department has no Employees.');
+    console.log('\n This Department has no Employees.\n');
     mainPrompts();
   }
   else {
@@ -77,7 +78,7 @@ async function viewDepartments() {
     mainPrompts();
   }
 }
-
+// views all Roles and Employees in those Roles
 async function viewRoles() {
   const roles = await db.getAllRoles();
   let { role } = await prompt([
@@ -88,12 +89,12 @@ async function viewRoles() {
       message: '\nWithin which Role would you like to View Employees?'
     }
   ]);
-  const employeesbyRole = await db.viewRole(role.toString());
+  const employeesbyRole = await db.viewRole(role);
   if (employeesbyRole == '') {
     console.log('\n');
-    const roleTable = await db.getThisRole(role.toString());
+    const roleTable = await db.getThisRole(role);
     console.table(roleTable);
-    console.log('\n No Employee is filling this Role.');
+    console.log('\n No Employee is filling this Role.\n');
     mainPrompts();
   }
   else {
@@ -102,14 +103,14 @@ async function viewRoles() {
     mainPrompts();
   }
 }
-
+// builds a new Table showing all Employee information
 async function viewEmployees() {
   const employee = await db.getAllEmployees();
   console.log('\n');
   console.table(employee);
   mainPrompts();
 }
-
+// menu option to Add to the different tables
 async function addToTables() {
   let { table } = await prompt([
     {
@@ -119,7 +120,6 @@ async function addToTables() {
       message: 'Would you like to Add to the [DEPARMENTS], [ROLES] or [EMPLOYEES] Table, or go [BACK] a step?'
     }
   ]);
-
   switch (table) {
     case 'DEPARTMENTS':
       return addToDepartments();
@@ -131,7 +131,7 @@ async function addToTables() {
       mainPrompts();
   }
 }
-
+// user can add new Department
 async function addToDepartments() {
   let { name } = await prompt(
     [
@@ -145,11 +145,10 @@ async function addToDepartments() {
   console.log('\nYour Department was created successfully.');
   mainPrompts();
 }
-
+// user can add new employee Role
 async function addToRoles() {
   const departments = await db.getAllDepartments();
-  let { title, salary, department } = await prompt(
-    [
+  let { title, salary, department } = await prompt([
       {
         name: 'title',
         type: 'input',
@@ -159,6 +158,7 @@ async function addToRoles() {
         name: 'salary',
         type: 'number',
         message: 'What is the Salary of the new Role? (Enter an Integer only.)',
+        // validate package used to ensure input is an integer
         validate: function (value) {
           if (isNaN(value) === false) {
             return true;
@@ -173,22 +173,24 @@ async function addToRoles() {
         message: 'What is the Department of the new Role?'
       }
     ])
-  const departmentRes = await db.getDepartmentIDByDepartment(department.toString());
-  const department_id = departmentRes[0].id;
+  // pull Department ID to use as an argument later
+  const departmentRes = await db.getDepartmentIDByDepartment(department);
+  const department_id = departmentRes[0].id; //pulls value from returned Object of SQL data
   await db.addNewRole(title, salary, department_id);
+  // get strings to print to console for user
   const newRole = await db.getThisRole(title);
   console.log(`\nYour Role of ${title} was created successfully:\n`);
   console.table(newRole);
   mainPrompts();
 }
-
+// add new Employee
 async function addToEmployees() {
   const roles = await db.getAllRoles();
   const employees = await db.whoIsEmployee();
   const managerChoices = employees.map(employee => employee.first_name + ' ' + employee.last_name);
+  // pushing choice for no manager into choices array
   managerChoices.push('[NONE]');
-  let { first_name, last_name, role, manager } = await prompt(
-    [
+  let { first_name, last_name, role, manager } = await prompt([
       {
         name: 'first_name',
         type: 'input',
@@ -211,11 +213,12 @@ async function addToEmployees() {
         choices: managerChoices,
         message: 'Who will be the Manager of the new Employee?\n (If they are not managed, select [NONE])'
       }
-    ],
-  );
+    ]);
+  // pull role_id for future argument
   const roleResponse = await db.getRoleIDByTitle(role);
   const role_id = roleResponse[0].id;
   let manager_id = null;
+  // if there is no manager for new Employee
   if (manager !== '[NONE]') {
     const managerResponse = await db.getManagerIDByEmployee(manager);
     manager_id = managerResponse[0].id;
@@ -224,15 +227,15 @@ async function addToEmployees() {
   console.log(`\nYour Employee ${first_name} ${last_name} was created successfully.\n`);
   mainPrompts();
 }
-
+// update Role of an Employee
 async function updateEmployees() {
-  const employeeTable = await db.getAllEmployees();
   const employees = await db.whoIsEmployee();
   const roles = await db.getAllRoles();
   console.log('\n');
+    // to show all Employees to user
+  const employeeTable = await db.getAllEmployees();
   console.table(employeeTable);
-  let { employee, newRole } = await prompt(
-    [
+  let { employee, newRole } = await prompt([
       {
         name: 'employee',
         type: 'rawlist',
@@ -245,18 +248,19 @@ async function updateEmployees() {
         choices: roles.map(role => role.title),
         message: `\nWhich Role would you like to assign?`
       }
-    ],
-  );
+    ]);
   const employeeRes = await db.getEmployeeIDFromEmployeeName(employee);
   let employee_id = employeeRes[0].id;
   const roleRes = await db.getRoleIDFromRoleTile(newRole);
   let role_id = roleRes[0].id;
-  const updatedEmployee = await db.updateEmployee(employee_id, role_id);
+  // update Role of Employee
+  await db.updateEmployee(employee_id, role_id);
   console.log(`\nYour Employee ${employee} has been promoted to ${newRole}:\n`);
+  // show table info of new Role for user convenience
   console.table(await db.getThisRole(newRole));
   mainPrompts();
 }
-
+// quit the application
 function quit() {
   console.log('\nThank you for your service to Evil Corp.');
   process.exit();
