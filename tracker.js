@@ -38,8 +38,8 @@ async function viewQueries() {
     {
       name: 'viewBy',
       type: 'rawlist',
-      choices: ['DEPARTMENT', 'ROLE', 'ALL EMPLOYEES', 'BACK'],
-      message: '\nWould you like to View Employees by [DEPARMENT], [ROLE] or View [ALL EMPLOYEES], or go [BACK] a step?'
+      choices: ['DEPARTMENT', 'ROLE', 'ALL EMPLOYEES', 'MANAGER', 'BACK'],
+      message: '\nWould you like to View Employees by [DEPARMENT], [ROLE], [MANAGER] or View [ALL EMPLOYEES], or go [BACK] a step?'
     }
   ]);
   // different ways user can View Employees
@@ -50,6 +50,8 @@ async function viewQueries() {
       return viewRoles();
     case 'ALL EMPLOYEES':
       return viewEmployees();
+    case 'MANAGER':
+      return viewByManager();
     case 'BACK':
       mainPrompts(); // return to main menu
   }
@@ -110,6 +112,24 @@ async function viewEmployees() {
   console.table(employee);
   mainPrompts();
 }
+// views Employees grouped by who manages them
+async function viewByManager() {
+  const managers = await db.getAllManagers();
+  console.table(managers);
+  let { manager } = await prompt([
+    {
+      name: 'manager',
+      type: 'rawlist',
+      choices: managers.map(manager => manager.Name),
+      message: '\nWhich Manager would you like to see the Employees of?'
+    }
+  ]);
+  // getting table of Employee info grouped by common Manager
+  const employeesByManagerRes = await db.getAllEmployeesByManager(manager);
+  console.log('\n');
+  console.table(employeesByManagerRes);
+  mainPrompts();
+}
 // menu option to Add to the different tables
 async function addToTables() {
   let { table } = await prompt([
@@ -149,30 +169,30 @@ async function addToDepartments() {
 async function addToRoles() {
   const departments = await db.getAllDepartments();
   let { title, salary, department } = await prompt([
-      {
-        name: 'title',
-        type: 'input',
-        message: '\nWhat is the Title of the new Role?'
-      },
-      {
-        name: 'salary',
-        type: 'number',
-        message: 'What is the Salary of the new Role? (Enter an Integer only.)',
-        // validate package used to ensure input is an integer
-        validate: function (value) {
-          if (isNaN(value) === false) {
-            return true;
-          }
-          return false;
+    {
+      name: 'title',
+      type: 'input',
+      message: '\nWhat is the Title of the new Role?'
+    },
+    {
+      name: 'salary',
+      type: 'number',
+      message: 'What is the Salary of the new Role? (Enter an Integer only.)',
+      // validate package used to ensure input is an integer
+      validate: function (value) {
+        if (isNaN(value) === false) {
+          return true;
         }
-      },
-      {
-        name: 'department',
-        type: 'rawlist',
-        choices: departments.map(department => department.name),
-        message: 'What is the Department of the new Role?'
+        return false;
       }
-    ])
+    },
+    {
+      name: 'department',
+      type: 'rawlist',
+      choices: departments.map(department => department.name),
+      message: 'What is the Department of the new Role?'
+    }
+  ])
   // pull Department ID to use as an argument later
   const departmentRes = await db.getDepartmentIDByDepartment(department);
   const department_id = departmentRes[0].id; //pulls value from returned Object of SQL data
@@ -191,29 +211,29 @@ async function addToEmployees() {
   // pushing choice for no manager into choices array
   managerChoices.push('[NONE]');
   let { first_name, last_name, role, manager } = await prompt([
-      {
-        name: 'first_name',
-        type: 'input',
-        message: '\nWhat is the First Name of the new Employee?'
-      },
-      {
-        name: 'last_name',
-        type: 'input',
-        message: 'What is the Last Name of the new Employee?'
-      },
-      {
-        name: 'role',
-        type: 'rawlist',
-        choices: roles.map(role => role.title),
-        message: 'What is the Role of the new Employee?',
-      },
-      {
-        name: 'manager',
-        type: 'rawlist',
-        choices: managerChoices,
-        message: 'Who will be the Manager of the new Employee?\n (If they are not managed, select [NONE])'
-      }
-    ]);
+    {
+      name: 'first_name',
+      type: 'input',
+      message: '\nWhat is the First Name of the new Employee?'
+    },
+    {
+      name: 'last_name',
+      type: 'input',
+      message: 'What is the Last Name of the new Employee?'
+    },
+    {
+      name: 'role',
+      type: 'rawlist',
+      choices: roles.map(role => role.title),
+      message: 'What is the Role of the new Employee?',
+    },
+    {
+      name: 'manager',
+      type: 'rawlist',
+      choices: managerChoices,
+      message: 'Who will be the Manager of the new Employee?\n (If they are not managed, select [NONE])'
+    }
+  ]);
   // pull role_id for future argument
   const roleResponse = await db.getRoleIDByTitle(role);
   const role_id = roleResponse[0].id;
@@ -232,23 +252,23 @@ async function updateEmployees() {
   const employees = await db.whoIsEmployee();
   const roles = await db.getAllRoles();
   console.log('\n');
-    // to show all Employees to user
+  // to show all Employees to user
   const employeeTable = await db.getAllEmployees();
   console.table(employeeTable);
   let { employee, newRole } = await prompt([
-      {
-        name: 'employee',
-        type: 'rawlist',
-        choices: employees.map(employee => employee.first_name + ' ' + employee.last_name),
-        message: 'Which Employee would you like to Update?'
-      },
-      {
-        name: 'newRole',
-        type: 'rawlist',
-        choices: roles.map(role => role.title),
-        message: `\nWhich Role would you like to assign?`
-      }
-    ]);
+    {
+      name: 'employee',
+      type: 'rawlist',
+      choices: employees.map(employee => employee.first_name + ' ' + employee.last_name),
+      message: 'Which Employee would you like to Update?'
+    },
+    {
+      name: 'newRole',
+      type: 'rawlist',
+      choices: roles.map(role => role.title),
+      message: `\nWhich Role would you like to assign?`
+    }
+  ]);
   const employeeRes = await db.getEmployeeIDByEmployeeName(employee);
   let employee_id = employeeRes[0].id;
   const roleRes = await db.getRoleIDByTitle(newRole);

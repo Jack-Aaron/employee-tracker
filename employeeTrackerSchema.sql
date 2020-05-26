@@ -23,14 +23,6 @@ CREATE TABLE employee(
   last_name VARCHAR(30) NOT NULL,
   role_id INT default 0,
   manager_id INT default NULL,
+  is_manager BOOLEAN default FALSE,
   PRIMARY KEY (id)
 );
-
-CREATE TABLE viewEmployees(
-id INT NOT NULL,
-first_name VARCHAR(30) NOT NULL,
-last_name VARCHAR(30) NOT NULL,
-role INT default 0,
-manager VARCHAR(30) NOT NULL
-);
-

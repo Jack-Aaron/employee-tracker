@@ -3,6 +3,7 @@ Built for managing a company's employees, to view and manage the departments, ro
 * Add departments, roles, employees<br>
 * View departments, roles, employees<br>
 * Update employee roles<br>
+* View employees by managers<br>
 
 ## Installation 
 ```npm install```<br>

@@ -16,7 +16,7 @@ class DB {
     INNER JOIN role ON role.id = employee.role_id
     INNER JOIN department ON department.id = role.department_id
     LEFT JOIN employee AS manager ON employee.manager_id = manager.id
-    WHERE department.name = '${department}'`)
+    WHERE department.name = '${department}'`);
   }
   // see everything in 'role' table
   getAllRoles() {
@@ -34,7 +34,7 @@ class DB {
     INNER JOIN role ON role.id = employee.role_id
     INNER JOIN department ON department.id = role.department_id
     LEFT JOIN employee AS manager ON employee.manager_id = manager.id
-    WHERE role.title = '${role}'`)
+    WHERE role.title = '${role}'`);
   }
   // the information on a specific role
   getThisRole(title) {
@@ -43,7 +43,7 @@ class DB {
     department.name AS 'Department'
     FROM role
     INNER JOIN department ON department.id = role.department_id
-    WHERE title = '${title}'`)
+    WHERE title = '${title}'`);
   }
   // a new table of all employee information and their managers
   getAllEmployees() {
@@ -52,6 +52,20 @@ class DB {
     INNER JOIN role ON role.id = employee.role_id
     INNER JOIN department ON department.id = role.department_id
     LEFT JOIN employee AS manager ON employee.manager_id = manager.id`);
+  }
+  // a list of all managers
+  getAllManagers() {
+    return this.connection.query(`SELECT concat(employee.first_name, ' ', employee.last_name) AS 'Name', id
+    FROM employee
+    WHERE is_manager = TRUE;`);
+  }
+  // a table of all Employee information grouped by manager
+  getAllEmployeesByManager(manager) {
+    return this.connection.query(`SELECT employee.id AS 'Employee ID', concat(employee.first_name, ' ', employee.last_name) AS 'Name', department.name AS 'Department', role.title 'Title'
+    FROM employee
+    INNER JOIN role ON role.id = employee.role_id
+    INNER JOIN department ON department.id = role.department_id
+    WHERE manager_id = 3`);
   }
   // inserts new entry into 'department' table
   addNewDepartment(name) {
@@ -63,7 +77,7 @@ class DB {
   getDepartmentIDByDepartment(department) {
     return this.connection.query(`SELECT id
     FROM department
-    WHERE name = '${department}'`)
+    WHERE name = '${department}'`);
   }
   // inserts new entry into 'role' table
   addNewRole(title, salary, department_id) {
@@ -81,7 +95,7 @@ class DB {
   getRoleIDByTitle(title) {
     return this.connection.query(`SELECT id
     FROM role
-    WHERE title = '${title}'`)
+    WHERE title = '${title}'`);
   }
   // returns manager_id when given a concated Employee name
   getManagerIDByEmployee(name) {
@@ -102,7 +116,7 @@ class DB {
   getEmployeeIDByEmployeeName(employee) {
     return this.connection.query(`SELECT id
     FROM employee
-    WHERE concat(first_name, ' ', last_name) = '${employee}'`)
+    WHERE concat(first_name, ' ', last_name) = '${employee}'`);
   }
   // updates Role of given Employee via selection
   updateEmployee(employee_id, role_id) {
@@ -116,5 +130,7 @@ class DB {
     ])
   }
 }
+
+// DELETE FROM 
 
 module.exports = new DB(connection);
