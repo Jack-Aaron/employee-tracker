@@ -18,7 +18,7 @@ Built for managing a company's employees, to view and manage the departments, ro
 <img src="screenshot.jpg"/>
 
 ## License
-This Readme Generator is under the ISC license.
+This application is under the ISC license.
 
 ## How You Can Contribute
 This is a course assigment and therefore needs no contribution.
